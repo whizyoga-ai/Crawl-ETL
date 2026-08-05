@@ -9,7 +9,7 @@ import logging
 import uuid
 import tempfile
 import aiohttp
-from typing import Dict, Any, List, Set, Optional
+from typing import Dict, Any, List, Set, Optional, Tuple
 from urllib.parse import urlparse, urljoin
 
 from .models import CrawlDocument, CrawlJobConfig, CrawlJobStatus, MediaItem
