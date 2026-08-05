@@ -129,9 +129,8 @@ def get_job_status(job_id: str):
 
 @app.get("/api/jobs/{job_id}/results")
 def get_job_results(job_id: str):
-    if job_id not in RESULTS_DB:
-        raise HTTPException(status_code=404, detail="Job results not found")
-    return [doc.dict() for doc in RESULTS_DB[job_id]]
+    docs = RESULTS_DB.get(job_id, [])
+    return [doc.dict() for doc in docs]
 
 @app.get("/api/jobs/{job_id}/download/{fmt}")
 def download_results(job_id: str, fmt: str):

@@ -237,9 +237,14 @@ async function loadJobResults() {
 
     try {
         const resp = await fetch(`${API_BASE}/api/jobs/${jobId}/results`);
-        const docs = await resp.json();
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            container.innerHTML = `<div class="empty-state">${err.detail || "Job results not ready yet."}</div>`;
+            return;
+        }
 
-        if (docs.length === 0) {
+        const docs = await resp.json();
+        if (!Array.isArray(docs) || docs.length === 0) {
             container.innerHTML = `<div class="empty-state">No documents scraped yet for job #${jobId}.</div>`;
             return;
         }
