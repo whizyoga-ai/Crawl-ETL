@@ -131,21 +131,40 @@ class UniversalCrawler:
         tables = []
         links = []
         media_items: List[MediaItem] = []
-        doc_type = "html"
-
         if "pdf" in content_type or final_url.lower().endswith(".pdf"):
             doc_type = "pdf"
+        elif "word" in content_type or final_url.lower().endswith(".docx"):
+            doc_type = "docx"
+        elif "excel" in content_type or "spreadsheet" in content_type or final_url.lower().endswith((".xlsx", ".csv")):
+            doc_type = "xlsx"
+        else:
+            doc_type = "html"
+
+        local_file_path = None
+        if doc_type in ["pdf", "docx", "xlsx"]:
+            job_download_dir = os.path.join("downloads", self.status.job_id)
+            os.makedirs(job_download_dir, exist_ok=True)
+            filename = os.path.basename(urlparse(final_url).path) or f"doc_{len(self.documents)+1}.{doc_type}"
+            if not filename.endswith(f".{doc_type}"):
+                filename += f".{doc_type}"
+            local_file_path = os.path.join(job_download_dir, filename)
+            try:
+                with open(local_file_path, "wb") as f:
+                    f.write(data)
+                self.log(f"Saved raw document to local drive: {local_file_path}")
+            except Exception as e:
+                self.log(f"Failed saving document file {filename}: {e}")
+
+        if doc_type == "pdf":
             pdf_res = DocumentExtractor.extract_pdf(data)
             cleaned_text = pdf_res["cleaned_text"]
             title = pdf_res["title"]
             tables = pdf_res["tables"]
-        elif "word" in content_type or final_url.lower().endswith(".docx"):
-            doc_type = "docx"
+        elif doc_type == "docx":
             docx_res = DocumentExtractor.extract_docx(data)
             cleaned_text = docx_res["cleaned_text"]
             tables = docx_res["tables"]
-        elif "excel" in content_type or "spreadsheet" in content_type or final_url.lower().endswith((".xlsx", ".csv")):
-            doc_type = "xlsx"
+        elif doc_type == "xlsx":
             excel_res = DocumentExtractor.extract_excel(data)
             cleaned_text = excel_res["cleaned_text"]
             tables = excel_res["tables"]

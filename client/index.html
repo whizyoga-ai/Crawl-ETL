@@ -76,12 +76,32 @@
 
             <!-- TAB 1: CRAWL LAUNCHER -->
             <section id="launcherTab" class="tab-pane active">
+                <!-- Natural Language AI Search Section -->
+                <div class="card glass-card" style="border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.05);">
+                    <div class="card-header-flex">
+                        <h3>🤖 Plain-Text AI Requirement Interpreter & Auto-Search</h3>
+                        <span class="badge-gpu">Top 10 Source Discovery</span>
+                    </div>
+                    <p class="subtitle">Enter your requirements in plain English (e.g. <em>"Find ICSE Physics Class 10 past papers and solution PDFs"</em>). The AI engine will interpret your intent, discover the top 10 source URLs, and automatically crawl & download target documents.</p>
+                    
+                    <form id="aiSearchForm" onsubmit="handleAISearchSubmit(event)">
+                        <div class="form-group">
+                            <label for="aiPrompt">What materials do you need?</label>
+                            <input type="text" id="aiPrompt" placeholder="e.g. Download ICSE Class 10 Physics question papers and syllabus PDFs" required style="font-size:1.05rem; padding:14px;">
+                        </div>
+                        <button type="submit" class="btn-primary" id="aiSearchBtn" style="background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);">
+                            <span>🔍 Interpret Intent, Find Top 10 Sources & Download Materials</span>
+                        </button>
+                    </form>
+                    <div id="aiSearchResults" style="margin-top:16px; display:none;"></div>
+                </div>
+
                 <div class="card glass-card">
-                    <h3>Crawl Job Configuration</h3>
+                    <h3>Direct URL Crawl Configuration</h3>
                     <form id="crawlForm" onsubmit="handleCrawlSubmit(event)">
                         <div class="form-group">
                             <label for="startUrls">Seed URLs (One per line):</label>
-                            <textarea id="startUrls" rows="4" placeholder="https://example.com&#10;https://news.ycombinator.com&#10;https://www.youtube.com/watch?v=sample" required></textarea>
+                            <textarea id="startUrls" rows="3" placeholder="https://example.com&#10;https://news.ycombinator.com&#10;https://www.youtube.com/watch?v=sample" required></textarea>
                         </div>
 
                         <div class="form-row">

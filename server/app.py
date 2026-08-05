@@ -70,6 +70,42 @@ def get_gpu_status():
         "pod_name": os.getenv("POD_NAME", "crawl-etl-standalone-gpu-0")
     }
 
+from pydantic import BaseModel
+from crawler_core.search import IntentSearchEngine
+
+class SearchCrawlRequest(BaseModel):
+    prompt: str
+    max_results: int = 10
+    max_depth: int = 2
+    enable_media_ai: bool = True
+
+@app.post("/api/search-and-crawl")
+async def search_and_crawl(req: SearchCrawlRequest, background_tasks: BackgroundTasks):
+    search_res = await IntentSearchEngine.find_top_source_urls(req.prompt, max_results=req.max_results)
+    urls = search_res["discovered_urls"]
+    if not urls:
+        raise HTTPException(status_code=404, detail="No candidate source URLs discovered for your query.")
+
+    import uuid
+    job_id = str(uuid.uuid4())[:8]
+    config = CrawlJobConfig(
+        start_urls=urls,
+        max_depth=req.max_depth,
+        max_pages=req.max_results * 3,
+        enable_media_ai=req.enable_media_ai
+    )
+    status = CrawlJobStatus(job_id=job_id, status="pending")
+    JOBS_DB[job_id] = status
+    RESULTS_DB[job_id] = []
+
+    background_tasks.add_task(run_background_crawl, job_id, config)
+    return {
+        "job_id": job_id,
+        "prompt": req.prompt,
+        "discovered_urls": urls,
+        "message": f"Interpreted requirement & discovered top {len(urls)} target sources."
+    }
+
 @app.post("/api/crawl")
 def start_crawl(config: CrawlJobConfig, background_tasks: BackgroundTasks):
     import uuid
@@ -160,9 +196,18 @@ def download_results(job_id: str, fmt: str):
             zf.writestr(f"crawl_etl_{job_id}.json", json.dumps(doc_dicts, indent=2, default=str))
             for idx, d in enumerate(docs):
                 zf.writestr(f"docs/doc_{idx+1}_{d.domain}.txt", f"URL: {d.url}\nTitle: {d.title}\n\n{d.cleaned_text}")
+            
+            # Package any raw downloaded PDFs, DOCX, XLSX files saved on disk
+            job_download_dir = os.path.join("downloads", job_id)
+            if os.path.exists(job_download_dir):
+                for root, _, files in os.walk(job_download_dir):
+                    for f in files:
+                        full_p = os.path.join(root, f)
+                        zf.write(full_p, os.path.join("raw_documents", f))
+
         zip_buf.seek(0)
         return StreamingResponse(zip_buf, media_type="application/zip", headers={
-            "Content-Disposition": f"attachment; filename=crawl_etl_{job_id}_bundle.zip"
+            "Content-Disposition": f"attachment; filename=crawl_etl_{job_id}_raw_materials.zip"
         })
     else:
         raise HTTPException(status_code=400, detail="Unsupported format. Use json, csv, markdown, or zip")

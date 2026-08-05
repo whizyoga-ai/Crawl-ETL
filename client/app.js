@@ -80,6 +80,57 @@ function clearLogs() {
     document.getElementById("terminalLogs").innerHTML = "";
 }
 
+async function handleAISearchSubmit(event) {
+    event.preventDefault();
+    const prompt = document.getElementById("aiPrompt").value.trim();
+    if (!prompt) return alert("Please enter your requirement in plain text.");
+
+    const btn = document.getElementById("aiSearchBtn");
+    const resultsDiv = document.getElementById("aiSearchResults");
+    btn.disabled = true;
+    btn.innerHTML = `<span>⏳ Interpreting Intent & Searching Top 10 Sources...</span>`;
+    resultsDiv.style.display = "block";
+    resultsDiv.innerHTML = `<div style="color:var(--accent-cyan); font-size:0.9rem;">Interpreting your requirement and querying search index for top candidate URLs...</div>`;
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/search-and-crawl`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                prompt: prompt,
+                max_results: 10,
+                max_depth: 2,
+                enable_media_ai: true
+            })
+        });
+        const res = await resp.json();
+        currentJobId = res.job_id;
+        
+        let urlsListHtml = `
+            <div style="background:rgba(10, 13, 20, 0.6); padding:16px; border-radius:10px; border:1px solid var(--border-accent); margin-top:12px;">
+                <h4 style="color:var(--accent-emerald); font-size:0.95rem; margin-bottom:8px;">✅ Target Sources Discovered (Top ${res.discovered_urls.length}):</h4>
+                <ul style="padding-left:20px; font-size:0.85rem; color:var(--text-muted);">
+                    ${res.discovered_urls.map(u => `<li><a href="${u}" target="_blank" style="color:var(--accent-cyan)">${u}</a></li>`).join('')}
+                </ul>
+                <div style="margin-top:10px; font-size:0.85rem; color:white;">Job <strong>#${res.job_id}</strong> scheduled! Redirecting to Live Ops...</div>
+            </div>
+        `;
+        resultsDiv.innerHTML = urlsListHtml;
+        appendLog(`[AI Engine] Discovered ${res.discovered_urls.length} top candidate source URLs for: '${prompt}'`, "success");
+        
+        setTimeout(() => {
+            switchTab('opsTab');
+            fetchJobsList();
+            btn.disabled = false;
+            btn.innerHTML = `<span>🔍 Interpret Intent, Find Top 10 Sources & Download Materials</span>`;
+        }, 3000);
+    } catch (e) {
+        resultsDiv.innerHTML = `<div style="color:red; font-size:0.9rem;">Failed to interpret request: ${e.message}</div>`;
+        btn.disabled = false;
+        btn.innerHTML = `<span>🔍 Interpret Intent, Find Top 10 Sources & Download Materials</span>`;
+    }
+}
+
 async function handleCrawlSubmit(event) {
     event.preventDefault();
     
