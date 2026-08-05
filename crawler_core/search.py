@@ -68,9 +68,17 @@ class IntentSearchEngine:
             except Exception as e:
                 logger.warning(f"Bing search fallback: {e}")
 
-        # If user typed a direct URL, ensure it's included
-        if query.startswith("http") and query not in discovered_urls:
-            discovered_urls.insert(0, query)
+        # Extract any embedded HTTP/HTTPS URLs present inside the prompt text
+        embedded_urls = re.findall(r'https?://[^\s<>"]+', query)
+        for url_match in embedded_urls:
+            if url_match not in discovered_urls:
+                discovered_urls.insert(0, url_match)
+
+        # Final safety fallback: If no external URLs found, use clean keywords to query
+        if not discovered_urls:
+            clean_words = [w for w in query.split() if not w.startswith("http")]
+            fallback_query = " ".join(clean_words[:5])
+            logger.info(f"Fallback search query: '{fallback_query}'")
 
         logger.info(f"Discovered top {len(discovered_urls)} target URLs for prompt '{query}'")
         return {
