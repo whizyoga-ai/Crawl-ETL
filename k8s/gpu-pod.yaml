@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crawl-etl-gpu-pod
+  labels:
+    app: crawl-etl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crawl-etl
+  template:
+    metadata:
+      labels:
+        app: crawl-etl
+    spec:
+      containers:
+      - name: crawl-etl-container
+        image: whizyoga/crawl-etl:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: 12Gi
+            cpu: "4"
+          requests:
+            nvidia.com/gpu: 1
+            memory: 4Gi
+            cpu: "2"
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crawl-etl-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: crawl-etl
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000

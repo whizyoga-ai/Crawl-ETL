@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  crawl-etl-pod:
+    build:
+      context: .
+      dockerfile: Dockerfile.gpu
+    container_name: crawl-etl-gpu-pod
+    ports:
+      - "8000:8000"
+    environment:
+      - POD_NAME=crawl-etl-standalone-gpu-0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped

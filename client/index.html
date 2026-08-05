@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Crawler (Crawl-ETL) - Unified Internet & Media Intelligence</title>
+    <meta name="description" content="Enterprise Universal Internet & Media ETL Crawler powered by GPU AI">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">🕷️</div>
+                <div class="brand-text">
+                    <h1>Crawl-ETL</h1>
+                    <span class="badge-gpu" id="gpuStatusBadge">Checking GPU...</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" onclick="switchTab('launcherTab')">
+                    <span class="icon">🚀</span> Crawl Launcher
+                </button>
+                <button class="nav-btn" onclick="switchTab('opsTab')">
+                    <span class="icon">⚡</span> Live Ops & Logs
+                </button>
+                <button class="nav-btn" onclick="switchTab('explorerTab')">
+                    <span class="icon">🔍</span> Media & Docs Explorer
+                </button>
+                <button class="nav-btn" onclick="switchTab('downloadTab')">
+                    <span class="icon">💾</span> Local Download Center
+                </button>
+            </nav>
+
+            <div class="system-card">
+                <h3>GPU Pod Health</h3>
+                <div class="stat-item">
+                    <span class="label">Device:</span>
+                    <span class="val" id="gpuDeviceName">Detecting...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Status:</span>
+                    <span class="val pulse-green" id="gpuPodStatus">Online</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h2 id="tabTitle">Crawl Launcher</h2>
+                    <p id="tabSubtitle">Configure and launch universal web, document, and GPU media extraction jobs.</p>
+                </div>
+                <div class="quick-stats">
+                    <div class="mini-stat">
+                        <span class="num" id="statPages">0</span>
+                        <span class="lbl">Pages Scraped</span>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="num" id="statMedia">0</span>
+                        <span class="lbl">Media Assets</span>
+                    </div>
+                    <div class="mini-stat">
+                        <span class="num" id="statActiveJobs">0</span>
+                        <span class="lbl">Active Jobs</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: CRAWL LAUNCHER -->
+            <section id="launcherTab" class="tab-pane active">
+                <div class="card glass-card">
+                    <h3>Crawl Job Configuration</h3>
+                    <form id="crawlForm" onsubmit="handleCrawlSubmit(event)">
+                        <div class="form-group">
+                            <label for="startUrls">Seed URLs (One per line):</label>
+                            <textarea id="startUrls" rows="4" placeholder="https://example.com&#10;https://news.ycombinator.com&#10;https://www.youtube.com/watch?v=sample" required></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="maxDepth">Crawl Depth Limit:</label>
+                                <input type="number" id="maxDepth" value="2" min="0" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="maxPages">Max Pages Count:</label>
+                                <input type="number" id="maxPages" value="20" min="1" max="1000">
+                            </div>
+                            <div class="form-group">
+                                <label for="concurrency">Async Concurrency:</label>
+                                <input type="number" id="concurrency" value="5" min="1" max="50">
+                            </div>
+                        </div>
+
+                        <div class="toggle-section">
+                            <h4>GPU & Intelligence Features</h4>
+                            <div class="toggle-grid">
+                                <label class="toggle-card">
+                                    <input type="checkbox" id="enableMediaAi" checked>
+                                    <span class="slider"></span>
+                                    <div class="toggle-info">
+                                        <strong>Video Frame Analysis & OCR</strong>
+                                        <small>Extract scene keyframes & optical text using GPU</small>
+                                    </div>
+                                </label>
+
+                                <label class="toggle-card">
+                                    <input type="checkbox" id="enableWhisper" checked>
+                                    <span class="slider"></span>
+                                    <div class="toggle-info">
+                                        <strong>Whisper Speech-to-Text</strong>
+                                        <small>GPU accelerated audio/video transcription</small>
+                                    </div>
+                                </label>
+
+                                <label class="toggle-card">
+                                    <input type="checkbox" id="enableJavascript" checked>
+                                    <span class="slider"></span>
+                                    <div class="toggle-info">
+                                        <strong>Dynamic SPA Renderer</strong>
+                                        <small>Execute client JS for rich web applications</small>
+                                    </div>
+                                </label>
+
+                                <label class="toggle-card">
+                                    <input type="checkbox" id="domainRestriction" checked>
+                                    <span class="slider"></span>
+                                    <div class="toggle-info">
+                                        <strong>Lock to Seed Domains</strong>
+                                        <small>Prevent crawler from straying off-domain</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="launchBtn">
+                            <span>🚀 Launch Expert Crawl Job</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 2: LIVE OPS & LOGS -->
+            <section id="opsTab" class="tab-pane">
+                <div class="grid-2col">
+                    <div class="card glass-card">
+                        <h3>Active Jobs Monitor</h3>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Job ID</th>
+                                        <th>Status</th>
+                                        <th>Pages</th>
+                                        <th>Media</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="jobsTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center">No crawl jobs initiated yet.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card glass-card">
+                        <div class="card-header-flex">
+                            <h3>Live Streaming Logs</h3>
+                            <button class="btn-sm" onclick="clearLogs()">Clear</button>
+                        </div>
+                        <div class="terminal-container" id="terminalLogs">
+                            <div class="log-line info">[System] WebSocket log stream initialized... ready for jobs.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: MEDIA & DOCS EXPLORER -->
+            <section id="explorerTab" class="tab-pane">
+                <div class="card glass-card">
+                    <div class="card-header-flex">
+                        <h3>Extracted Document & Media Inspector</h3>
+                        <div class="filter-controls">
+                            <select id="jobSelector" onchange="loadJobResults()">
+                                <option value="">Select Job ID...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="resultsContainer" class="results-list">
+                        <div class="empty-state">Select a completed job above to inspect extracted documents, media transcripts, keyframes, and tabular data.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: LOCAL DOWNLOAD CENTER -->
+            <section id="downloadTab" class="tab-pane">
+                <div class="card glass-card">
+                    <h3>Download Crawled Data to Local Machine</h3>
+                    <p class="subtitle">Directly save extracted structured datasets, media transcripts, and scraped documents onto your local drive.</p>
+                    
+                    <div class="download-grid">
+                        <div class="download-card" onclick="triggerDownload('json')">
+                            <div class="file-icon">📄</div>
+                            <h4>Full JSON Dataset</h4>
+                            <p>Complete raw text, metadata, extracted entities, and timestamped transcripts.</p>
+                            <button class="btn-outline">Download .JSON</button>
+                        </div>
+
+                        <div class="download-card" onclick="triggerDownload('csv')">
+                            <div class="file-icon">📊</div>
+                            <h4>Structured CSV Table</h4>
+                            <p>Flattened spreadsheet format ideal for Excel, Pandas, or database imports.</p>
+                            <button class="btn-outline">Download .CSV</button>
+                        </div>
+
+                        <div class="download-card" onclick="triggerDownload('markdown')">
+                            <div class="file-icon">📝</div>
+                            <h4>Markdown Digest</h4>
+                            <p>Formatted markdown document clean for LLM context, RAG, and reading.</p>
+                            <button class="btn-outline">Download .MD</button>
+                        </div>
+
+                        <div class="download-card" onclick="triggerDownload('zip')">
+                            <div class="file-icon">📦</div>
+                            <h4>Complete ZIP Archive</h4>
+                            <p>All extracted files, documents, and transcripts packaged in a compressed zip bundle.</p>
+                            <button class="btn-outline">Download .ZIP Bundle</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
