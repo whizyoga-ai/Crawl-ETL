@@ -21,7 +21,7 @@ torch>=2.1.0
 torchaudio>=2.1.0
 openai-whisper>=20231117
 opencv-python-headless>=4.9.0
-pillow>=10.2.0
+pillow>=10.2.0,<12.0.0
 numpy>=1.26.0
 
 # System & Utilities
