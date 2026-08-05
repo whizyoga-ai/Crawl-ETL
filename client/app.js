@@ -104,13 +104,18 @@ async function handleAISearchSubmit(event) {
             })
         });
         const res = await resp.json();
+        if (!resp.ok) {
+            throw new Error(res.detail || "Search discovery failed.");
+        }
+
+        const discoveredUrls = res.discovered_urls || [];
         currentJobId = res.job_id;
         
         let urlsListHtml = `
             <div style="background:rgba(10, 13, 20, 0.6); padding:16px; border-radius:10px; border:1px solid var(--border-accent); margin-top:12px;">
-                <h4 style="color:var(--accent-emerald); font-size:0.95rem; margin-bottom:8px;">✅ Target Sources Discovered (Top ${res.discovered_urls.length}):</h4>
+                <h4 style="color:var(--accent-emerald); font-size:0.95rem; margin-bottom:8px;">✅ Target Sources Discovered (Top ${discoveredUrls.length}):</h4>
                 <ul style="padding-left:20px; font-size:0.85rem; color:var(--text-muted);">
-                    ${res.discovered_urls.map(u => `<li><a href="${u}" target="_blank" style="color:var(--accent-cyan)">${u}</a></li>`).join('')}
+                    ${discoveredUrls.map(u => `<li><a href="${u}" target="_blank" style="color:var(--accent-cyan)">${u}</a></li>`).join('')}
                 </ul>
                 <div style="margin-top:10px; font-size:0.85rem; color:white;">Job <strong>#${res.job_id}</strong> scheduled! Redirecting to Live Ops...</div>
             </div>
